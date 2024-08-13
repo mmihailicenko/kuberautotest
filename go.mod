@@ -4,7 +4,12 @@ go 1.22.3
 
 toolchain go1.22.6
 
-require sigs.k8s.io/e2e-framework v0.4.0
+require (
+	github.com/stretchr/testify v1.8.4
+	k8s.io/api v0.30.1
+	k8s.io/apimachinery v0.30.1
+	sigs.k8s.io/e2e-framework v0.4.0
+)
 
 require (
 	github.com/beorn7/perks v1.0.1 // indirect
@@ -34,6 +39,7 @@ require (
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/mxk/go-flowrate v0.0.0-20140419014527-cca7078d478f // indirect
 	github.com/pkg/errors v0.9.1 // indirect
+	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/prometheus/client_golang v1.18.0 // indirect
 	github.com/prometheus/client_model v0.5.0 // indirect
 	github.com/prometheus/common v0.45.0 // indirect
@@ -51,8 +57,6 @@ require (
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	k8s.io/api v0.30.1 // indirect
-	k8s.io/apimachinery v0.30.1 // indirect
 	k8s.io/client-go v0.30.1 // indirect
 	k8s.io/component-base v0.30.1 // indirect
 	k8s.io/klog/v2 v2.120.1 // indirect

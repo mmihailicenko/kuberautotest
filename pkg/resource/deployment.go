@@ -1,25 +1,51 @@
 package resource
 
 import (
+	"context"
 	"fmt"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"kubeclusterautotest/pkg/test_context"
+	"sigs.k8s.io/e2e-framework/pkg/envconf"
 )
 
 /*
 Deployment Object Functions
 */
 
-func CreateDeployment(tc *test_context.TestContext, obj runtime.Object) error {
-	deployment, ok := obj.(*appsv1.Deployment)
-	if !ok {
-		return fmt.Errorf("failed to create deployment: invalid type")
+func CreateDeployment(tc *test_context.TestContext, deployment *appsv1.Deployment) error {
+	if err := tc.Config.Client().Resources().Create(tc.Context, deployment); err != nil {
+		return fmt.Errorf("failed to create deployment: %w", err)
 	}
+	return WaitForDeploymentReady(tc, deployment)
+}
 
-	return tc.Config.Client().Resources(tc.Config.Namespace()).Create(tc.Context, deployment)
+func GetDeployment(tc *test_context.TestContext, deployment *appsv1.Deployment) (*appsv1.Deployment, error) {
+	if err := tc.Config.Client().Resources().Get(tc.Context, deployment.GetName(), deployment.GetNamespace(), deployment); err != nil {
+		return nil, fmt.Errorf("failed to get deployment: %w", err)
+	}
+	return deployment, nil
+}
+
+func WaitForDeploymentReady(tc *test_context.TestContext, deployment *appsv1.Deployment) error {
+	readinessChecker := func(ctx context.Context, config *envconf.Config) (bool, error) {
+		dep, err := GetDeployment(tc, deployment)
+		if err != nil {
+			if apierrors.IsNotFound(err) {
+				return false, nil
+			}
+			return false, fmt.Errorf("failed to get deployment: %w", err)
+		}
+		return dep.Status.ReadyReplicas == *dep.Spec.Replicas, nil
+	}
+	//in progress
+	if err := WaitFor(tc, readinessChecker); err != nil {
+		return fmt.Errorf("deployment not ready in time: %w", err)
+	}
+	return nil
 }
 
 /*
